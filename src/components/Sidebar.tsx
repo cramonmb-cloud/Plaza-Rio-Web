@@ -78,7 +78,7 @@ export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout 
             }} />
             <div>
               <h2 className="font-extrabold text-slate-900 text-lg tracking-tight">Plaza del Río</h2>
-              <span className="text-xs text-blue-600 font-semibold tracking-wider uppercase">Parking Admin</span>
+              <span className="text-xs text-blue-600 font-semibold tracking-wider uppercase">Control de Estacionamiento</span>
             </div>
           </div>
           <button 

@@ -53,8 +53,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     document.addEventListener('mouseleave', handleMouseLeave);
 
     // Dynamic wave parameters
-    const riverY = height * 0.65; // Positioned near bottom-middle
-    const riverHeight = 165;      // Distinct vertical thickness instead of filling to bottom
+    const riverY = height * 0.20; // Positioned at logo level (top-middle)
+    const riverHeight = 160;      // Distinct vertical thickness
     
     // Foam / Bubble particles to show current direction
     const particles: Array<{ x: number; y: number; speed: number; size: number; alpha: number }> = [];
@@ -62,11 +62,14 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * riverHeight,
-        speed: 2.2 + Math.random() * 3.8, // Flowing from left to right (positive speed)
+        speed: 2.2 + Math.random() * 3.5, // Flowing from left to right (positive speed)
         size: 0.8 + Math.random() * 2.8,
         alpha: 0.12 + Math.random() * 0.48,
       });
     }
+
+    // Sparkles spawned by mouse hover
+    const splashes: Array<{ x: number; y: number; vx: number; vy: number; size: number; alpha: number; color: string }> = [];
 
     const waves = [
       {
@@ -111,7 +114,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
       t += 0.55;
 
-      // Draw a soft base gradient for the riverbed
+      // Draw a soft base gradient for the riverbed behind the logo
       const grad = ctx.createLinearGradient(0, riverY - 40, 0, riverY + riverHeight + 40);
       grad.addColorStop(0, 'rgba(56, 189, 248, 0.0)');
       grad.addColorStop(0.2, 'rgba(56, 189, 248, 0.06)');
@@ -120,6 +123,21 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       grad.addColorStop(1, 'rgba(3, 105, 161, 0.0)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, riverY - 45, width, riverHeight + 90);
+
+      // Spawn glowing splashes near mouse when it hovers the river
+      if (mouse.active && Math.abs(mouse.y - (riverY + 15)) < 90) {
+        if (Math.random() < 0.45) {
+          splashes.push({
+            x: mouse.x,
+            y: mouse.y - riverY, // relative to riverY
+            vx: 1.5 + Math.random() * 2.5, // flows to the right with current
+            vy: (Math.random() - 0.5) * 0.8, // slight drift up/down
+            size: 1.2 + Math.random() * 2.5,
+            alpha: 1.0,
+            color: Math.random() > 0.4 ? '#e0f2fe' : '#38bdf8', // sparkling white-blue or cyan
+          });
+        }
+      }
 
       // Draw waves as flowing water ribbons
       waves.forEach((wave) => {
@@ -130,16 +148,16 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           let yVal = Math.sin(x * wave.length + t * wave.speed) * wave.amplitude;
           yVal += Math.cos(x * (wave.length * 2.3) - t * (wave.speed * 0.65)) * (wave.amplitude * 0.35);
 
-          // Ripple / deflection on hover
+          // Ripple / deflection on hover: smooth indentation/dip under mouse
           if (mouse.active) {
             const dx = x - mouse.x;
             const waveY = riverY + wave.yOffset + yVal;
             const dy = waveY - mouse.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
             
-            if (dist < 160) {
-              const force = (160 - dist) / 160;
-              yVal += Math.sin(dx * 0.05 - t * 0.12) * 24 * force;
+            if (dist < 150) {
+              const force = (150 - dist) / 150;
+              yVal += force * 15; // Smoothly press down the water level
             }
           }
 
@@ -191,6 +209,29 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
         ctx.fill();
       });
+
+      // Update and draw glowing sparkling mouse splashes
+      ctx.save();
+      for (let i = splashes.length - 1; i >= 0; i--) {
+        const s = splashes[i];
+        s.x += s.vx;
+        s.y += s.vy;
+        s.alpha -= 0.015; // fade out
+
+        if (s.alpha <= 0 || s.x > width + 10) {
+          splashes.splice(i, 1);
+          continue;
+        }
+
+        ctx.beginPath();
+        ctx.arc(s.x, riverY + s.y, s.size, 0, Math.PI * 2);
+        ctx.fillStyle = s.color;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = s.color;
+        ctx.globalAlpha = s.alpha;
+        ctx.fill();
+      }
+      ctx.restore();
 
       animationFrameId = requestAnimationFrame(render);
     };

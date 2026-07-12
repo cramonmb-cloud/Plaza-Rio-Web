@@ -1,0 +1,17 @@
+{
+  "short_name": "Plaza del Río",
+  "name": "Plaza del Río - Control de Estacionamiento",
+  "icons": [
+    {
+      "src": "/logo-plaza-1.jpg",
+      "type": "image/jpeg",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "display": "standalone",
+  "orientation": "any"
+}

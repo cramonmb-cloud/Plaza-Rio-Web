@@ -53,35 +53,49 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     document.addEventListener('mouseleave', handleMouseLeave);
 
     // Dynamic wave parameters
-    const riverY = height * 0.70; // Positioned near bottom-middle
+    const riverY = height * 0.65; // Positioned near bottom-middle
+    const riverHeight = 165;      // Distinct vertical thickness instead of filling to bottom
+    
+    // Foam / Bubble particles to show current direction
+    const particles: Array<{ x: number; y: number; speed: number; size: number; alpha: number }> = [];
+    for (let i = 0; i < 45; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * riverHeight,
+        speed: 2.2 + Math.random() * 3.8, // Flowing from left to right (positive speed)
+        size: 0.8 + Math.random() * 2.8,
+        alpha: 0.12 + Math.random() * 0.48,
+      });
+    }
+
     const waves = [
       {
-        yOffset: -25,
-        length: 0.0025,
-        amplitude: 24,
-        speed: 0.015,
-        color: 'rgba(56, 189, 248, 0.22)', // light cyan
+        yOffset: -30,
+        length: 0.0035,
+        amplitude: 14,
+        speed: 0.045, // Faster speed to show running current
+        color: 'rgba(56, 189, 248, 0.20)', // light cyan
       },
       {
-        yOffset: 0,
-        length: 0.0018,
-        amplitude: 32,
-        speed: 0.01,
-        color: 'rgba(14, 165, 233, 0.32)', // sky blue
-      },
-      {
-        yOffset: 25,
+        yOffset: -5,
         length: 0.0022,
-        amplitude: 22,
-        speed: 0.018,
-        color: 'rgba(2, 132, 199, 0.42)', // cobalt blue
+        amplitude: 20,
+        speed: 0.032,
+        color: 'rgba(14, 165, 233, 0.28)', // sky blue
       },
       {
-        yOffset: 50,
-        length: 0.0013,
-        amplitude: 36,
-        speed: 0.008,
-        color: 'rgba(3, 105, 161, 0.28)', // deep river blue
+        yOffset: 20,
+        length: 0.0028,
+        amplitude: 16,
+        speed: 0.052,
+        color: 'rgba(2, 132, 199, 0.36)', // cobalt blue
+      },
+      {
+        yOffset: 45,
+        length: 0.0016,
+        amplitude: 24,
+        speed: 0.024,
+        color: 'rgba(3, 105, 161, 0.22)', // deep river blue
       }
     ];
 
@@ -95,41 +109,86 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       mouse.x += (mouse.targetX - mouse.x) * 0.08;
       mouse.y += (mouse.targetY - mouse.y) * 0.08;
 
-      t += 0.45;
+      t += 0.55;
 
+      // Draw a soft base gradient for the riverbed
+      const grad = ctx.createLinearGradient(0, riverY - 40, 0, riverY + riverHeight + 40);
+      grad.addColorStop(0, 'rgba(56, 189, 248, 0.0)');
+      grad.addColorStop(0.2, 'rgba(56, 189, 248, 0.06)');
+      grad.addColorStop(0.5, 'rgba(14, 165, 233, 0.16)');
+      grad.addColorStop(0.8, 'rgba(2, 132, 199, 0.08)');
+      grad.addColorStop(1, 'rgba(3, 105, 161, 0.0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, riverY - 45, width, riverHeight + 90);
+
+      // Draw waves as flowing water ribbons
       waves.forEach((wave) => {
         ctx.beginPath();
         
-        for (let x = 0; x <= width; x += 5) {
+        const topPoints: Array<{ x: number; y: number }> = [];
+        for (let x = 0; x <= width; x += 10) {
           let yVal = Math.sin(x * wave.length + t * wave.speed) * wave.amplitude;
-          yVal += Math.cos(x * (wave.length * 2.2) - t * (wave.speed * 0.75)) * (wave.amplitude * 0.38);
+          yVal += Math.cos(x * (wave.length * 2.3) - t * (wave.speed * 0.65)) * (wave.amplitude * 0.35);
 
-          // Interaction offset if mouse is close
+          // Ripple / deflection on hover
           if (mouse.active) {
             const dx = x - mouse.x;
             const waveY = riverY + wave.yOffset + yVal;
             const dy = waveY - mouse.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
             
-            if (dist < 180) {
-              const force = (180 - dist) / 180;
-              yVal += Math.sin(dx * 0.06 - t * 0.15) * 22 * force;
+            if (dist < 160) {
+              const force = (160 - dist) / 160;
+              yVal += Math.sin(dx * 0.05 - t * 0.12) * 24 * force;
             }
           }
 
-          const drawY = riverY + wave.yOffset + yVal;
+          topPoints.push({ x, y: riverY + wave.yOffset + yVal });
+        }
 
-          if (x === 0) {
-            ctx.moveTo(x, drawY);
-          } else {
-            ctx.lineTo(x, drawY);
+        // Draw top ribbon edge
+        ctx.moveTo(topPoints[0].x, topPoints[0].y);
+        for (let i = 1; i < topPoints.length; i++) {
+          ctx.lineTo(topPoints[i].x, topPoints[i].y);
+        }
+
+        // Draw bottom ribbon edge (thickness of 45px)
+        for (let i = topPoints.length - 1; i >= 0; i--) {
+          const pt = topPoints[i];
+          ctx.lineTo(pt.x, pt.y + 45);
+        }
+
+        ctx.closePath();
+        ctx.fillStyle = wave.color;
+        ctx.fill();
+      });
+
+      // Update and draw foam/bubbles running down the current
+      particles.forEach((p) => {
+        p.x += p.speed; // Move to the right
+        
+        // Push slightly from mouse cursor
+        if (mouse.active) {
+          const dx = p.x - mouse.x;
+          const py = riverY + p.y;
+          const dy = py - mouse.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 90) {
+            const force = (90 - dist) / 90;
+            p.x += (dx / dist) * 2.5 * force;
           }
         }
 
-        ctx.lineTo(width, height);
-        ctx.lineTo(0, height);
-        ctx.closePath();
-        ctx.fillStyle = wave.color;
+        // Reset if went out of screen bounds
+        if (p.x > width + 10) {
+          p.x = -15;
+          p.y = Math.random() * riverHeight;
+        }
+
+        const py = riverY + p.y;
+        ctx.beginPath();
+        ctx.arc(p.x, py, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
         ctx.fill();
       });
 

@@ -400,11 +400,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
         {/* Login Card */}
         <div className="glass-panel rounded-3xl p-8 shadow-xl">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-slate-900">Iniciar Sesión</h2>
-            <p className="text-xs text-slate-500 mt-1">Acceso exclusivo para Administradores de Plaza del Río</p>
-          </div>
-
           {error && (
             <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-sm flex items-start gap-3">
               <AlertCircle size={18} className="shrink-0 mt-0.5" />
@@ -425,7 +420,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   id="username"
                   type="text"
                   required
-                  placeholder="ej. juan_admin"
+                  placeholder="ej. ramon_admin"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-11 pr-4 py-3 bg-white/80 border border-slate-200 rounded-xl text-slate-950 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"

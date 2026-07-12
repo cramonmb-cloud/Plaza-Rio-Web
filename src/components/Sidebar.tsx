@@ -37,7 +37,6 @@ export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout 
     { id: 'users', label: 'Empleados y Usuarios', icon: Users },
     { id: 'shifts', label: 'Turnos y Cortes', icon: History },
     { id: 'prepaid', label: 'Pensionados / Mensuales', icon: CreditCard },
-    { id: 'config', label: 'Configuración de Ticket', icon: Printer },
     { id: 'reports', label: 'Reportes y Descargas', icon: BarChart3 },
   ];
   return (

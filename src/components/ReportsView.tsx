@@ -321,6 +321,17 @@ export default function ReportsView() {
 
   // Export to native styled PDF file (.pdf)
   const handleExportPDF = () => {
+    const img = new Image();
+    img.src = '/logo-plaza-1.jpg';
+    img.onload = () => {
+      generatePdf(img);
+    };
+    img.onerror = () => {
+      generatePdf(null);
+    };
+  };
+
+  const generatePdf = (logoImg: HTMLImageElement | null) => {
     const doc = new jsPDF('p', 'mm', 'a4');
     let y = 15;
 
@@ -339,14 +350,30 @@ export default function ReportsView() {
     doc.text(`Filtro: ${filterLabel} (${new Date(range.startMs).toLocaleDateString()} - ${new Date(range.endMs).toLocaleDateString()})`, 14, 23);
     doc.text(`Fecha de exportación: ${new Date().toLocaleString()}`, 14, 28);
     
-    // Draw white rectangle logo mockup in corner
-    doc.setFillColor(59, 130, 246); // blue-500
-    doc.rect(168, 8, 28, 22, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('Helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.text('PARKING', 174, 18);
-    doc.text('ADMIN', 177, 23);
+    // Draw logo or placeholder in corner
+    if (logoImg) {
+      try {
+        doc.addImage(logoImg, 'JPEG', 168, 8, 28, 22);
+      } catch (e) {
+        console.error('Error adding image to PDF:', e);
+        // Fallback
+        doc.setFillColor(59, 130, 246); // blue-500
+        doc.rect(168, 8, 28, 22, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.text('PARKING', 174, 18);
+        doc.text('ADMIN', 177, 23);
+      }
+    } else {
+      doc.setFillColor(59, 130, 246); // blue-500
+      doc.rect(168, 8, 28, 22, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('PARKING', 174, 18);
+      doc.text('ADMIN', 177, 23);
+    }
 
     y = 48;
 
@@ -485,7 +512,7 @@ export default function ReportsView() {
     doc.setFont('Helvetica', 'bold');
     doc.setFontSize(13);
     doc.setTextColor(30, 41, 59);
-    doc.text('4. HISTORIAL DETALLADO DE BOLETOS', 14, y);
+    doc.text('4. HISTORIAL DETALLADO DE TICKETS', 14, y);
     y += 5;
     doc.line(14, y, 196, y);
     y += 6;

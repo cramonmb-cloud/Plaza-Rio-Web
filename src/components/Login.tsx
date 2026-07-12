@@ -18,6 +18,134 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [dbEmpty, setDbEmpty] = useState<boolean | null>(null);
   const [currentDbId, setCurrentDbId] = useState(getPreferredDbId());
 
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const mouseRef = React.useRef({ x: -1000, y: -1000, targetX: -1000, targetY: -1000, active: false });
+
+  // Interactive River Wave Animation
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current.targetX = e.clientX;
+      mouseRef.current.targetY = e.clientY;
+      mouseRef.current.active = true;
+    };
+
+    const handleMouseLeave = () => {
+      mouseRef.current.active = false;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseleave', handleMouseLeave);
+
+    // Dynamic wave parameters
+    const riverY = height * 0.70; // Positioned near bottom-middle
+    const waves = [
+      {
+        yOffset: -25,
+        length: 0.0025,
+        amplitude: 24,
+        speed: 0.015,
+        color: 'rgba(56, 189, 248, 0.22)', // light cyan
+      },
+      {
+        yOffset: 0,
+        length: 0.0018,
+        amplitude: 32,
+        speed: 0.01,
+        color: 'rgba(14, 165, 233, 0.32)', // sky blue
+      },
+      {
+        yOffset: 25,
+        length: 0.0022,
+        amplitude: 22,
+        speed: 0.018,
+        color: 'rgba(2, 132, 199, 0.42)', // cobalt blue
+      },
+      {
+        yOffset: 50,
+        length: 0.0013,
+        amplitude: 36,
+        speed: 0.008,
+        color: 'rgba(3, 105, 161, 0.28)', // deep river blue
+      }
+    ];
+
+    let t = 0;
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      // Smooth mouse follow
+      const mouse = mouseRef.current;
+      mouse.x += (mouse.targetX - mouse.x) * 0.08;
+      mouse.y += (mouse.targetY - mouse.y) * 0.08;
+
+      t += 0.45;
+
+      waves.forEach((wave) => {
+        ctx.beginPath();
+        
+        for (let x = 0; x <= width; x += 5) {
+          let yVal = Math.sin(x * wave.length + t * wave.speed) * wave.amplitude;
+          yVal += Math.cos(x * (wave.length * 2.2) - t * (wave.speed * 0.75)) * (wave.amplitude * 0.38);
+
+          // Interaction offset if mouse is close
+          if (mouse.active) {
+            const dx = x - mouse.x;
+            const waveY = riverY + wave.yOffset + yVal;
+            const dy = waveY - mouse.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist < 180) {
+              const force = (180 - dist) / 180;
+              yVal += Math.sin(dx * 0.06 - t * 0.15) * 22 * force;
+            }
+          }
+
+          const drawY = riverY + wave.yOffset + yVal;
+
+          if (x === 0) {
+            ctx.moveTo(x, drawY);
+          } else {
+            ctx.lineTo(x, drawY);
+          }
+        }
+
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+        ctx.fillStyle = wave.color;
+        ctx.fill();
+      });
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
   // Check if users collection is empty to guide the user to create a default admin
   useEffect(() => {
     async function checkDbEmpty() {
@@ -145,6 +273,12 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden font-sans">
+      {/* Interactive River Canvas Background */}
+      <canvas 
+        ref={canvasRef} 
+        className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-85"
+      />
+
       {/* Aurora Background Blobs */}
       <div className="aurora-bg">
         <div className="aurora-blob aurora-blob-1"></div>

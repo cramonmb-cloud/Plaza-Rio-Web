@@ -306,7 +306,7 @@ export default function UsersView({ currentUser }: UsersViewProps) {
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase text-slate-500 bg-slate-50 px-2.5 py-0.5 rounded-full border border-slate-200">
-                            Empleado / Employee
+                            Empleado
                           </span>
                         )}
                       </td>

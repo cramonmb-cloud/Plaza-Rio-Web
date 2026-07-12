@@ -337,8 +337,8 @@ export default function ParkingRecordsView({ currentUser }: ParkingRecordsViewPr
               className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
             >
               <option value="ALL">Todos los Estados</option>
-              <option value="ACTIVE">Activos (En Estacionamiento)</option>
-              <option value="COMPLETED">Completados (Exited)</option>
+              <option value="ACTIVE">Estacionados</option>
+              <option value="COMPLETED">Salió</option>
             </select>
           </div>
 
@@ -469,11 +469,11 @@ export default function ParkingRecordsView({ currentUser }: ParkingRecordsViewPr
                       <td className="py-3.5 px-4 text-center">
                         {rec.status === 'ACTIVE' ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-100">
-                            Activo
+                            Estacionado
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
-                            Terminado
+                            Salió
                           </span>
                         )}
                       </td>
@@ -812,8 +812,8 @@ export default function ParkingRecordsView({ currentUser }: ParkingRecordsViewPr
                   onChange={(e) => setEditStatus(e.target.value as 'ACTIVE' | 'COMPLETED')}
                   className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-slate-950 text-xs focus:outline-none"
                 >
-                  <option value="ACTIVE">Activo (En Estacionamiento)</option>
-                  <option value="COMPLETED">Terminado / Completado</option>
+                  <option value="ACTIVE">Estacionado</option>
+                  <option value="COMPLETED">Salió</option>
                 </select>
               </div>
 

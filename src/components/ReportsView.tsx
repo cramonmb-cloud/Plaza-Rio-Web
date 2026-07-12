@@ -303,7 +303,7 @@ export default function ReportsView() {
       r.ticketCode,
       r.plate,
       r.vehicleType,
-      r.status === 'ACTIVE' ? 'Activo (Adentro)' : 'Completado (Salida)',
+      r.status === 'ACTIVE' ? 'Estacionado' : 'Salió',
       new Date(r.entryTime).toLocaleString(),
       r.exitTime ? new Date(r.exitTime).toLocaleString() : 'N/A',
       r.paymentMethod || 'N/A',
@@ -546,7 +546,7 @@ export default function ReportsView() {
         doc.text(r.vehicleType, 65, y + 4.5);
         doc.text(new Date(r.entryTime).toLocaleDateString() + ' ' + new Date(r.entryTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), 95, y + 4.5);
         doc.text(r.amountPaid !== null ? `$${r.amountPaid.toFixed(2)}` : '$0.00', 145, y + 4.5);
-        doc.text(r.status === 'ACTIVE' ? 'Adentro' : 'Cobrado', 175, y + 4.5);
+        doc.text(r.status === 'ACTIVE' ? 'Estacionado' : 'Salió', 175, y + 4.5);
         y += 6;
       });
 
@@ -855,7 +855,7 @@ export default function ReportsView() {
                             ? 'bg-blue-50 text-blue-600 border border-blue-100 print:bg-blue-100 print:text-blue-700'
                             : 'bg-emerald-50 text-emerald-600 border border-emerald-100 print:bg-emerald-100 print:text-emerald-700'
                         }`}>
-                          {r.status === 'ACTIVE' ? 'Adentro' : 'Cobrado'}
+                          {r.status === 'ACTIVE' ? 'Estacionado' : 'Salió'}
                         </span>
                       </td>
                     </tr>
